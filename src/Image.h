@@ -10,30 +10,35 @@
 #include <vector>
 #include <stdexcept>
 
-template <typename T, size_t C>
+
+template<typename T, int C>
+struct Pixel{
+    T channels[C];
+};
+
+template <typename T, int C>
 class Image {
-public:
-    struct Pixel{
-        T channels[C];
-    };
-
 private:
-    std::vector<Pixel> pixels;
     int width, height;
+    std::vector<Pixel<T,C>> pixels;//FIXME: forse da mettere pubblico, però se fatto, da cambiare anche altri metodi (readPPM)
 
 public:
-    Image(int w, int h) : width(w), height(h) {
-        pixels.resize(w * h);
+
+    explicit Image(int w=0, int h=0) : width(w), height(h) {
+        pixels.resize(w*h);
     }
 
-    //TODO: copy constructor e operatore di asssegnazione
-    Image(const Image& img){
-    }
+    Image(const Image& other): width(other.width), height(other.height), pixels(other.pixels) {}
+    //TODO:operatore di asssegnazione
     Image& operator=(const Image& img){
+
     }
+    ~Image()= default;
 
     int get_width(){ return width; }
     int get_height(){ return height; }
+    void setWidth(int w) { width = w; }
+    void setHeight(int h) { height = h; }
 
     void is_valid_index(int x, int y) const{
         if (x < 0 || x >= width || y < 0 || y >= height) {
@@ -41,23 +46,34 @@ public:
         }
     }
 
-    Pixel& get_pixel(int x, int y) {
+
+    //FIXME: probabilmente da levare perché si possono accedere tramire vector
+    Pixel<T,C>& get_pixel(int x, int y) {
         is_valid_index(x, y);
-        int index = y * width + x;
-        return pixels[index];
+        return pixels[y * width + x];
     }
 
-    void set_pixel(int x, int y, const Pixel px) {
+    //FIXME: ha senso, forse sì per copy constructor o operatore di assegnazione
+    void set_pixel(int x, int y, const Pixel<T,C> px) {
         is_valid_index(x, y);
         int index = y * width + x;
         for (int i = 0; i < C; i++) {
             pixels[index].channels[i] = px.channels[i];
         }
     }
+    //avendo i valori per ogni canale
+    void set_pixel(int x, int y, T values[C]){
+        is_valid_index(x, y);
+        int index = y * width + x;
+        for(int i=0; i < C; i++){
+            pixels[index].channels[i] = values[i];
+        }
+    }
 
     std::string get_magic_number(){
         std::string magic_number;
-        // TODO: per ora gestito solo formato testuale, gestire anche binario?
+        // TODO:  gestire anche 2, 4 CANALI
+        //TODO: per ora gestita solo forma testuale, gestire anche forma binaria?
         if(C==1){
             magic_number = "P2";
         }
@@ -69,32 +85,29 @@ public:
         }
         return magic_number;
     }
-    void write_to_PPM(const std::string& filename) const{
-        std::ofstream img_file(filename, std::ios::out);
+    void write_to_PPM(const std::string& filename) {
+        std::ofstream img_file(filename, std::ios::app);
         if(!img_file.is_open()){
-            throw std::runtime_error("bbbb");
+            throw std::runtime_error("Error");
         }
         std::string magic_number = get_magic_number();
-        img_file<< magic_number << "\n" << width << " " << height << 255<< "\n"; // FIXME: CREDO CHE  255 non abbia senso
-        //TODO: scrivere i valori dei pixel
-        for(Pixel px:pixels){
-            for(T val:px.channels){
-                img_file << val << " ";
+        int max_val = 255; //FIXME: da definire per ogni canale?
+
+        //ppm header
+        img_file<< magic_number << "\n" << width << " " << height << "\n"<< max_val<< "\n";
+
+        //pixels values
+        for (const Pixel px : pixels) {
+            for (int i = 0; i < C; i++) {
+                img_file << static_cast<int>(px.channels[i]) << " ";  //Guarantee PPM correct format
             }
-            img_file << "\n";
+            img_file << "\n";//FIXME?: forse da cambiare per risparmiare spazio?
         }
         img_file.close();
     }
 
     /*TODO: un possibile test è: leggere un file già in PPM e creare l'oggetto Image equivalente, poi trasformalo con il metodo creato
      * in un PPM e vedere se sono uguali*/
-
-
-
-
-
-
-
 };
 
 #endif //IMAGES_TEMPLATE__LABPROGR__IMAGE_H
