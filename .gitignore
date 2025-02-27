@@ -9,6 +9,7 @@ bin/
 obj/
 
 # File generati da CMake
+cmake-build-debug/
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake

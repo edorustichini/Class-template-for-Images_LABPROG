@@ -6,6 +6,7 @@
 #define IMAGES_TEMPLATE__LABPROGR__PPM_IO_H
 
 #include "Image.h"
+#include <algorithm>
 
 class PPM_IO {
 public:
@@ -29,7 +30,8 @@ public:
             for (int x = 0; x < w; x++) {
                 const auto& px = img_obj.get_pixel(x, y);
                 for (int i = 0; i < C; i++) {
-                    img_file << static_cast<int>(px.channels[i]) << " ";//Cast for correct PPM's format
+                    int clamped_value = std::clamp(px.channels[i], 0, 255);  // 🔥 Clamp dei valori
+                    img_file << clamped_value << " ";//Cast for correct PPM's format
                 }
                 img_file << "\n";
             }

@@ -50,7 +50,7 @@ public:
         }
     }
 
-    Pixel<T,C>& get_pixel(int x, int y) {
+    const Pixel<T,C>& get_pixel(int x, int y) const {
         is_valid_index(x, y);
         return pixels[y * width + x];
     }

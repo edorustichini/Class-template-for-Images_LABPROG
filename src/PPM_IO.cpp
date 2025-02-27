@@ -3,6 +3,7 @@
 //
 
 #include "PPM_IO.h"
+//TODO: capire dove è usata
 int PPM_IO::determine_channels(const std::string &filename) {
     std::ifstream img_file(filename, std::ios::in);
     if (!img_file.is_open()) {
