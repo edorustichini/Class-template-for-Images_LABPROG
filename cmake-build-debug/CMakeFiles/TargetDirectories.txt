@@ -1,3 +1,0 @@
-/home/edo/CLionProjects/Images_Template_(LabProgr)/cmake-build-debug/CMakeFiles/Images_Template__LabProgr_.dir
-/home/edo/CLionProjects/Images_Template_(LabProgr)/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/edo/CLionProjects/Images_Template_(LabProgr)/cmake-build-debug/CMakeFiles/rebuild_cache.dir
