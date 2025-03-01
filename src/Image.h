@@ -81,30 +81,9 @@ public:
             magic_number = "P3";
         }
         else{
-            throw std::runtime_error("Formato PPM non supportato per C=" + std::to_string(C));
+            throw std::runtime_error("Formato PPM non supportato per " + std::to_string(C) + " canali");
         }
         return magic_number;
-    }
-
-    void write_to_PPM(const std::string& filename) const {
-        std::ofstream img_file("../images/output/"+filename, std::ios::out);
-        if(!img_file.is_open()){
-            throw std::runtime_error("Error opening file");
-        }
-        std::string magic_number = get_magic_number();
-        int max_val = 255; //valore per formati PPM
-
-        //reading of header
-        img_file << magic_number << "\n" << width << " " << height << "\n" << max_val << "\n";
-
-        //reading of pixels
-        for (const auto& px : pixels) {
-            for (int i = 0; i < C; i++) {
-                img_file << static_cast<int>(px.channels[i]) << " ";
-            }
-            img_file << "\n";
-        }
-        img_file.close();
     }
 };
 #endif //IMAGES_TEMPLATE__LABPROGR__IMAGE_H
