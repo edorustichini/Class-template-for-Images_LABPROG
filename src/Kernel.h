@@ -35,10 +35,10 @@ public:
     Image<IMG_T, C> apply_kernel(const Image<IMG_T, C>& old_img) const {
         Image<IMG_T, C> new_img(old_img.get_width(), old_img.get_height());
 
-        // Kernel radius
+        // kernel radius
         int k_radius = (K_dim - 1) / 2;
 
-        // Apply kernel to each pixel
+        // apply kernel to each pixel
         for(int y = 0; y < old_img.get_height(); y++) {
             for(int x = 0; x < old_img.get_width(); x++) {
 
@@ -47,7 +47,7 @@ public:
                 // Convolution expression from https://en.wikipedia.org/wiki/Kernel_(image_processing)
                 for(int j = -k_radius; j <= k_radius; j++) {
                     for(int i = -k_radius; i <= k_radius; i++) {
-                        // Sub-image of kernel overlapping image
+                        // coordinates of pixels to be considered
                         int sub_img_x = x + i;
                         int sub_img_y = y + j;
 
@@ -60,13 +60,12 @@ public:
 
 
                         for(int k = 0; k < C; k++) {
-                            //Used double for precision
                             acc[k] += static_cast<double>(k_value) * static_cast<double>(sq_pixel.channels[k]);
                         }
                     }
                 }
 
-                //Cast to the image_pixels's type
+                //Cast to image_pixels's type
                 IMG_T filtered_pixel[C];
                 for(int k = 0; k < C; k++) {
                     filtered_pixel[k] = static_cast<IMG_T>(acc[k]);
@@ -85,12 +84,14 @@ public:
         int width = img.get_width();
         int height = img.get_height();
 
-        if(x >= 0 && x < width && y >= 0 && y < height) {
-            // Pixel is inside the image
+        if(x >= 0 && x < width && y >= 0 && y < height) { // Pixel is inside the image
             px = img.get_pixel(x, y);
         }
-        else {
-            // apply padding
+
+        else { //(x,y) is outside the image
+            int extended_x = x, extended_y = y;
+
+            // Edge handling technique described in: https://en.wikipedia.org/wiki/Kernel_(image_processing)
             switch(padding_choice) {
                 case ZERO: {
                     // Zero padding
@@ -100,88 +101,47 @@ public:
                     break;
                 }
                 case EXTEND: {
-                    // Extend padding
-                    // Clamp coordinates to image boundaries
-                    int nx = std::min(std::max(x, 0), width - 1);
-                    int ny = std::min(std::max(y, 0), height - 1);
-                    px = img.get_pixel(nx, ny);
+                    if(x < 0){
+                        extended_x = 0;
+                    } else if (x >= width){
+                        extended_x = width - 1;
+                    }
+                    if(y < 0){
+                        extended_y = 0;
+                    } else if(y >= height){
+                        extended_y = height - 1;
+                    }
+                    px = img.get_pixel(extended_x, extended_y);
                     break;
                 }
                 case WRAP: {
-                    // Wrap padding
-                    // Use modulo to wrap around
-                    int nx = ((x % width) + width) % width;  // Handle negative values
-                    int ny = ((y % height) + height) % height;
-                    px = img.get_pixel(nx, ny);
+                    extended_x = ((x % width) + width) % width; //first modulo to handle negative numbers
+                    extended_y = ((y % height) + height) % height;
+                    px = img.get_pixel(extended_x, extended_y);
                     break;
                 }
                 case MIRROR: {
-                    // Mirror padding - mirror reflection at the boundary
-                    // This includes duplicating the border pixel
-                    int nx = x;
-                    int ny = y;
-
-                    // Handle x-coordinate
-                    if(nx < 0) {
-                        nx = -nx - 1;
-                    } else if(nx >= width) {
-                        nx = 2 * width - nx - 1;
+                    if(extended_x < 0) {
+                        extended_x = -extended_x - 1;
+                    } else if(extended_x >= width) {
+                        extended_x = 2 * width - extended_x - 1;
                     }
-
-                    // Handle y-coordinate
-                    if(ny < 0) {
-                        ny = -ny - 1;
-                    } else if(ny >= height) {
-                        ny = 2 * height - ny - 1;
+                    if(extended_y < 0) {
+                        extended_y = -extended_y - 1;
+                    } else if(extended_y >= height) {
+                        extended_y = 2 * height - extended_y - 1;
                     }
+                    //FIXME: gestire caso in cui è così tanto fuori dallìimmagine, da uscire dall'altro bordo
 
-                    // Ensure we're within bounds after mirroring (in case of very large values)
-                    nx = std::min(std::max(nx, 0), width - 1);
-                    ny = std::min(std::max(ny, 0), height - 1);
-
-                    px = img.get_pixel(nx, ny);
+                    px = img.get_pixel(extended_x, extended_y);
                     break;
                 }
-                case REFLECT: {
-                    // Reflect padding - reflection without duplicating the border pixel
-                    int nx = x;
-                    int ny = y;
 
-                    // Handle x-coordinate
-                    if(nx < 0) {
-                        nx = -nx;
-                    } else if(nx >= width) {
-                        nx = 2 * (width - 1) - nx;
-                    }
-
-                    // Handle y-coordinate
-                    if(ny < 0) {
-                        ny = -ny;
-                    } else if(ny >= height) {
-                        ny = 2 * (height - 1) - ny;
-                    }
-
-                    // Ensure we're within bounds after reflection (in case of very large values)
-                    nx = std::min(std::max(nx, 0), width - 1);
-                    ny = std::min(std::max(ny, 0), height - 1);
-
-                    px = img.get_pixel(nx, ny);
-                    break;
-                }
-                case CROP: {
-                    // Crop padding - only consider valid pixels
-                    // Fill with zeros for pixels outside the image (effectively ignoring them)
-                    for(int i = 0; i < C; i++) {
-                        px.channels[i] = 0;
-                    }
-                    break;
-                }
                 default: {
-                    // Default to zero padding if padding_choice is not recognized
-                    for(int i = 0; i < C; i++) {
+                    //CONSTANT
+                    for(int i=0; i<C; i++){
                         px.channels[i] = 0;
                     }
-                    break;
                 }
             }
         }
