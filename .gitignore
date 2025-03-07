@@ -1,7 +1,10 @@
-# File oggetto e binari
+
 *.o
 *.out
 *.exe
 
-# Cartelle di build
+# build
 cmake-build-debug/
+
+# output images
+images/output/
