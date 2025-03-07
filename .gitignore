@@ -4,6 +4,4 @@
 *.exe
 
 # Cartelle di build
-cmake-build-debug/*
-
-src/images/*
+cmake-build-debug/
