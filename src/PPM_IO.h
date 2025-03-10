@@ -18,11 +18,11 @@ public:
             throw std::runtime_error("Error opening file");
         }
         std::string magic_number = img_obj.get_magic_number();
-        int max_val = 255; // PPM format
+        int max_val = 255; // most used value for PPM format
         int w = img_obj.get_width();
         int h = img_obj.get_height();
 
-        //write header
+        //write header in PPM format
         img_file << magic_number << "\n" << w << " " << h << "\n" << max_val << "\n";
 
         //write pixels
@@ -30,8 +30,7 @@ public:
             for (int x = 0; x < w; x++) {
                 const auto& px = img_obj.get_pixel(x, y);
                 for (int i = 0; i < C; i++) {
-
-                    int clamped_value = std::clamp(px.channels[i], 0, 255); //Clamp to 0-255 for correct PPM format
+                    int clamped_value = std::clamp(px.channels[i], 0, 255); //0 if value < 0, 255 if value > 255
                     img_file << clamped_value << " ";
                 }
                 //img_file << "\n";
@@ -52,6 +51,8 @@ public:
 
         img_file >> magic_number;
 
+        //FIXME: qua in teoria il C non lo conosco, ma se non lo conosco come faccio a sapere se è 1 o 3?
+        //quindi forse da cambiare tutto
         if ((C == 3 && magic_number != "P3") || (C == 1 && magic_number != "P2")) {
             throw std::runtime_error("Incorrect format");
         }

@@ -3,4 +3,4 @@
 //
 
 #include <gtest/gtest.h>
-#include "../src/Image.h"
+#include "../src/Kernel.h"

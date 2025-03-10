@@ -18,7 +18,7 @@ template <typename T, int C>
 class Image {
 private:
     int width, height;
-    std::vector<Pixel<T,C>> pixels; //FIXME: forse fa mettere privbato, ma nel caso cambiare funzione write/read(??)
+    std::vector<Pixel<T,C>> pixels;
 
 public:
 
