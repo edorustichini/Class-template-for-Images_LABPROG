@@ -33,14 +33,14 @@ public:
 
     template<typename IMG_T, int C>
     Image<IMG_T, C> apply_kernel(const Image<IMG_T, C>& old_img) const {
-        Image<IMG_T, C> new_img(old_img.get_width(), old_img.get_height());
+        Image<IMG_T, C> new_img(old_img.getWidth(), old_img.getHeight());
 
         // kernel radius
         int k_radius = (K_dim - 1) / 2;
 
         // apply kernel to each pixel
-        for(int y = 0; y < old_img.get_height(); y++) {
-            for(int x = 0; x < old_img.get_width(); x++) {
+        for(int y = 0; y < old_img.getHeight(); y++) {
+            for(int x = 0; x < old_img.getWidth(); x++) {
 
                 std::array<double, C> acc{};
 
@@ -81,8 +81,8 @@ public:
     template<typename IMG_T, int C>
     Pixel<IMG_T, C> get_padded_pixel(int x, int y, const Image<IMG_T, C>& img) const {
         Pixel<IMG_T, C> px;
-        int width = img.get_width();
-        int height = img.get_height();
+        int width = img.getWidth();
+        int height = img.getHeight();
 
         if(x >= 0 && x < width && y >= 0 && y < height) { // Pixel is inside the image
             px = img.get_pixel(x, y);

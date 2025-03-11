@@ -14,24 +14,44 @@ struct Pixel{
     T channels[C];
 };
 
-template <typename T, int C>
-class Image {
+//product interface (factory pattern)
+class BaseImage {
 private:
     int width, height;
-    std::vector<Pixel<T,C>> pixels; //FIXME: forse fa mettere privbato, ma nel caso cambiare funzione write/read(??)
-
 public:
+    explicit BaseImage(int w=0, int h=0) : width(w), height(h) {}
+    virtual ~BaseImage() = default;
 
-    explicit Image(int w=0, int h=0) : width(w), height(h) {
+    int getWidth() const { return width; }
+    int getHeight() const { return height; }
+    void setWidth(int w) { width = w; }
+    void setHeight(int h) { height = h; }
+
+    void is_valid_index(int x, int y) const {
+        if (x < 0 || x >= getWidth() || y < 0 || y >= getHeight()) {
+            throw std::out_of_range("Index out of bounds");
+        }
+    }
+
+    virtual const Pixel<int , 3> get_pixel(int x, int y) const = 0;
+};
+
+//concrete product (factory pattern)
+template <typename T, int C>
+class Image : public BaseImage{
+private:
+    std::vector<Pixel<T,C>> pixels; //FIXME: forse fa mettere privato, ma nel caso cambiare funzione write/read(??)
+public:
+    explicit Image(int w=0, int h=0) : BaseImage(w, h) {
         pixels.resize(w*h);
     }
 
-    Image(const Image& other): width(other.width), height(other.height), pixels(other.pixels) {}
+    Image(const Image& other): BaseImage(other.getWidth(), other.getHeight()), pixels(other.pixels) {}
 
     Image& operator=(const Image& img){
         if (this != &img) {
-            width = img.width;
-            height = img.height;
+            setWidth(img.getWidth());
+            setHeight(img.getHeight());
             pixels = img.pixels;
         }
         return *this;
@@ -39,51 +59,25 @@ public:
 
     ~Image()= default;
 
-    int get_width() const { return width; }
-    int get_height() const { return height; }
-    void setWidth(int w) { width = w; }
-    void setHeight(int h) { height = h; }
-
-    void is_valid_index(int x, int y) const {
-        if (x < 0 || x >= width || y < 0 || y >= height) {
-            throw std::out_of_range("Index out of bounds");
-        }
-    }
-
     const Pixel<T,C>& get_pixel(int x, int y) const {
         is_valid_index(x, y);
-        return pixels[y * width + x];
+        return pixels[y * getWidth() + x];
     }
 
     void set_pixel(int x, int y, const Pixel<T,C>& px) {
         is_valid_index(x, y);
-        int index = y * width + x;
+        int index = y * getWidth() + x;
         for (int i = 0; i < C; i++) {
             pixels[index].channels[i] = px.channels[i];
         }
     }
 
-    //se ho valori per ogni canale
     void set_pixel(int x, int y, const T values[C]){
         is_valid_index(x, y);
-        int index = y * width + x;
+        int index = y * getWidth() + x;
         for(int i=0; i < C; i++){
             pixels[index].channels[i] = values[i];
         }
-    }
-
-    std::string get_magic_number() const {
-        std::string magic_number;
-        if(C==1){
-            magic_number = "P2";
-        }
-        else if(C==3){
-            magic_number = "P3";
-        }
-        else{
-            throw std::runtime_error("Formato PPM non supportato per " + std::to_string(C) + " canali");
-        }
-        return magic_number;
     }
 };
 #endif //IMAGES_TEMPLATE__LABPROGR__IMAGE_H
