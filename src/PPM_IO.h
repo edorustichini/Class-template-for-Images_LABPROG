@@ -13,7 +13,7 @@ public:
 
     template<typename T, int C>
     static void write_to_PPM(const std::string& filename, Image<T,C>& img_obj) {
-        std::ofstream img_file(filename, std::ios::out);
+        std::ofstream img_file("../images/output/"+filename, std::ios::out);
         if(!img_file.is_open()){
             throw std::runtime_error("Error opening file");
         }
