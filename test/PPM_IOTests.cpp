@@ -5,46 +5,42 @@
 #include "../src/PPM_IO.h"
 #include "../src/Kernel.h"
 
-/*TODO:
- * - test che legge un'immagine, la scrive in un oggetto e crea una nuova immagine.
- *   poi si guarda se quello che è scritto è uguale, questo è un test di integrazione(?)
- *   */
+//TODO: considerare di usare fixture per test di read e write
 
-TEST(PPM_IO, read_write) {
-    try {
-        // 1️⃣ Percorso dell'immagine da leggere
-        std::string input_path = "../../images/bird2.ppm";
-        std::string output_path = "output.ppm";
-        std::string filtered_path = "prova filtr.ppm";
+TEST(PPM_IOTest, write){
+    Image<int, 3> img(2, 2);
+    Pixel<int, 3> px[] = {{255, 255, 255}, {255, 0, 0}, {0, 0, 255},{0, 128, 0}};
+    int  i = 0;
+    //two ways to set a pixel
+    for(int y = 0; y < img.get_height(); y++) {
+        for(int x = 0; x < img.get_width(); x++) {
+            img.set_pixel(x, y, px[i]);//with a Pixel object
+            i++;
+        }
+    }
+    ASSERT_NO_THROW(PPM_IO::write_to_PPM("../../images/output/tests/simmple-rgb.ppm", img));
+}
 
-        // 2️⃣ Leggiamo l'immagine PPM
-        Image<int, 3> img = PPM_IO::read_PPM<int, 3>(input_path);
-        std::cout << "✅ Immagine letta con successo da: " << input_path << std::endl;
+TEST(PPM_IOTest, read){
+    //TODO
+}
 
 
+TEST(PPM_IOTest, readwrite) {
+    std::vector<std::string> list = {"apollo.ppm", "landscape.ppm", "bird2.ppm", "monument.ppm"};
 
-        // Salviamo una copia dell'immagine originale
+    for(int i=0;i < list.size(); i++){
+        Image<int, 3> img = PPM_IO::read_PPM<int, 3>("../../images/"+list[i]);
+        std::string output_path = "../../images/output/tests/"+list[i]+"_Test.ppm";
         PPM_IO::write_to_PPM(output_path, img);
-        std::cout << "✅ Immagine copiata in: " << output_path << std::endl;
+        Image<int, 3> img2 = PPM_IO::read_PPM<int, 3>(output_path);
 
-        // Definiamo un kernel 3x3 di edge detection (Sobel)
-        std::array<std::array<int, 3>, 3> sobel_x = {{
-                                                             { 0,  1, 0 },
-                                                             { 1,  -4, 1 },
-                                                             { 0,  1, 0 }
-                                                     }};
-
-        Kernel<int, 3> kernel(sobel_x, 0); // Zero-padding
-
-        //Applichiamo il filtro all'immagine
-        Image<int, 3> filtered_img = kernel.apply_kernel(img);
-        std::cout << "✅ Filtro applicato correttamente." << std::endl;
-
-        //Salviamo l'immagine filtrata
-        PPM_IO::write_to_PPM(filtered_path, filtered_img);
-        std::cout << "✅ Immagine filtrata salvata in: " << filtered_path << std::endl;
-
-    } catch (const std::exception& e) {
-        std::cerr << "❌ Errore: " << e.what() << std::endl;
+        for (int y = 0; y < img.get_height(); y++) {
+            for (int x = 0; x < img.get_width(); x++) {
+                EXPECT_EQ(img.get_pixel(x, y).channels[0], img2.get_pixel(x, y).channels[0]);
+                EXPECT_EQ(img.get_pixel(x, y).channels[1], img2.get_pixel(x, y).channels[1]);
+                EXPECT_EQ(img.get_pixel(x, y).channels[2], img2.get_pixel(x, y).channels[2]);
+            }
+        }
     }
 }
