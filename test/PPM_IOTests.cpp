@@ -18,11 +18,11 @@ TEST(PPM_IOTest, write){
             i++;
         }
     }
-    ASSERT_NO_THROW(PPM_IO::write_to_PPM("../../images/output/tests/simmple-rgb.ppm", img));
+    ASSERT_NO_THROW(PPM_IO::write_to_PPM("../../images/tests/simmple-rgb.ppm", img));
 }
 
 TEST(PPM_IOTest, read){
-    //TODO
+    //TODO: cosa testare?
 }
 
 
@@ -31,7 +31,7 @@ TEST(PPM_IOTest, readwrite) {
 
     for(int i=0;i < list.size(); i++){
         Image<int, 3> img = PPM_IO::read_PPM<int, 3>("../../images/"+list[i]);
-        std::string output_path = "../../images/output/tests/"+list[i]+"_Test.ppm";
+        std::string output_path = "../../images/tests/"+list[i]+"_Test.ppm";
         PPM_IO::write_to_PPM(output_path, img);
         Image<int, 3> img2 = PPM_IO::read_PPM<int, 3>(output_path);
 
