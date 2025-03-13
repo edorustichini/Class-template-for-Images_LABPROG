@@ -15,8 +15,6 @@ enum PaddingType {
     EXTEND = 1,    // Extend border pixels
     WRAP = 2,      // Wrap around (periodic boundary)
     MIRROR = 3,    // Mirror reflection at the boundary
-    REFLECT = 4,   // Reflection without duplicating the border pixel
-    CROP = 5       // Only apply kernel to valid pixels (no padding)
 };
 
 template<typename T, int K_dim>

@@ -13,9 +13,9 @@ public:
 
     template<typename T, int C>
     static void write_to_PPM(const std::string& filename, Image<T,C>& img_obj) {
-        std::ofstream img_file("../images/output/"+filename, std::ios::out);
+        std::ofstream img_file(filename, std::ios::out);
         if(!img_file.is_open()){
-            throw std::runtime_error("Error opening file");
+            throw std::runtime_error("Impossible to write file");
         }
         std::string magic_number = img_obj.get_magic_number();
         int max_val = 255; // most used value for PPM format
@@ -43,7 +43,7 @@ public:
     static Image<T,C> read_PPM(const std::string& filename) {
         std::ifstream img_file(filename, std::ios::in);
         if (!img_file.is_open()) {
-            throw std::runtime_error("Error opening file.");
+            throw std::runtime_error("Impossible to read file");
         }
 
         std::string magic_number;

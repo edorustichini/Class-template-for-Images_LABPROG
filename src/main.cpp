@@ -8,7 +8,7 @@
 int main() {
     try {
         std::string input_path = "../images/apollo.ppm";
-        std::string output_path = "output.ppm";
+        std::string output_path = "../images/output/output.ppm";
         std::string filtered_path = "prova filtr.ppm";
 
         Image<int, 3> img = PPM_IO::read_PPM<int, 3>(input_path);
@@ -20,9 +20,9 @@ int main() {
         std::cout << "✅ Immagine copiata in: " << output_path << std::endl;
 
         std::array<std::array<int, 3>, 3> sobel_x = {{
+                                                             { 0,  0, 0 },
                                                              { 0,  1, 0 },
-                                                             { 1,  -4, 1 },
-                                                             { 0,  1, 0 }
+                                                             { 0,  0, 0 }
                                                      }};
 
         Kernel<int, 3> kernel(sobel_x, 0); // Zero-padding
@@ -33,6 +33,7 @@ int main() {
         //Salviamo l'immagine filtrata
         PPM_IO::write_to_PPM(filtered_path, filtered_img);
         std::cout << "✅ Immagine filtrata salvata in: " << filtered_path << std::endl;
+
 
     } catch (const std::exception& e) {
         std::cerr << "❌ Errore: " << e.what() << std::endl;
