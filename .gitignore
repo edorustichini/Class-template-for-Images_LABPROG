@@ -8,3 +8,5 @@ cmake-build-debug/
 
 # output images
 images/output/
+
+test/lib
