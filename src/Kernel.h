@@ -10,21 +10,23 @@
 #include "Image.h"
 
 // Enum for padding types
-enum PaddingType {
-    ZERO = 0,      // Fill with zeros
-    EXTEND = 1,    // Extend border pixels
-    WRAP = 2,      // Wrap around (periodic boundary)
-    MIRROR = 3,    // Mirror reflection at the boundary
+enum class PaddingType {
+    ZERO,      // Fill with zeros
+    EXTEND,    // Extend border pixels
+    WRAP,      // Wrap around (periodic boundary)
+    MIRROR,    // Mirror reflection at the boundary
 };
 
-template<typename T, int K_dim>
+
+template<typename WeightType, int K_dim>
 class Kernel {
 private:
-    std::array<std::array<T, K_dim>, K_dim> k_matrix;
-    int padding_choice;
+    PaddingType padding_choice;
 public:
+    std::array<std::array<WeightType, K_dim>, K_dim> k_matrix;
 
-    explicit Kernel(const std::array<std::array<T, K_dim>, K_dim>& m, int p = 0) : padding_choice(p) {
+
+    explicit Kernel(const std::array<std::array<WeightType, K_dim>, K_dim>& m, PaddingType p = PaddingType::ZERO) : padding_choice(p) {
         k_matrix = m;
     }
     ~Kernel() = default;
@@ -54,7 +56,7 @@ public:
 
 
                         Pixel<IMG_T, C> sq_pixel = get_padded_pixel<IMG_T, C>(sub_img_x, sub_img_y, old_img);
-                        T k_value = k_matrix[kernel_y][kernel_x];
+                        WeightType k_value = k_matrix[kernel_y][kernel_x];
 
 
                         for(int k = 0; k < C; k++) {
@@ -87,18 +89,18 @@ public:
         }
 
         else { //(x,y) is outside the image
-            int extended_x = x, extended_y = y;
+            int extended_x = x, extended_y = y; // These variables will be used to map out-of-bounds coordinates to valid pixel positions based on the padding method
 
             // Edge handling technique described in: https://en.wikipedia.org/wiki/Kernel_(image_processing)
             switch(padding_choice) {
-                case ZERO: {
+                case PaddingType::ZERO: {
                     // Zero padding
                     for(int i = 0; i < C; i++) {
                         px.channels[i] = 0;
                     }
                     break;
                 }
-                case EXTEND: {
+                case PaddingType::EXTEND:{
                     if(x < 0){
                         extended_x = 0;
                     } else if (x >= width){
@@ -112,25 +114,23 @@ public:
                     px = img.get_pixel(extended_x, extended_y);
                     break;
                 }
-                case WRAP: {
+                case PaddingType::WRAP: {
                     extended_x = ((x % width) + width) % width; //first modulo to handle negative numbers
                     extended_y = ((y % height) + height) % height;
                     px = img.get_pixel(extended_x, extended_y);
                     break;
                 }
-                case MIRROR: {
-                    if(extended_x < 0) {
-                        extended_x = -extended_x - 1;
-                    } else if(extended_x >= width) {
-                        extended_x = 2 * width - extended_x - 1;
+                case PaddingType::MIRROR: {
+                    if(x < 0) {
+                        extended_x = -x;
+                    } else if(x > width-1) {
+                        extended_x = (2 * width - x - 1) - 1; //final -1 because origin is in (0,0)
                     }
-                    if(extended_y < 0) {
-                        extended_y = -extended_y - 1;
-                    } else if(extended_y >= height) {
-                        extended_y = 2 * height - extended_y - 1;
+                    if(y < 0) {
+                        extended_y = -y;
+                    } else if(y > height-1) {
+                        extended_y = (2 * height - y - 1) - 1;
                     }
-                    //FIXME: gestire caso in cui è così tanto fuori dallìimmagine, da uscire dall'altro bordo
-
                     px = img.get_pixel(extended_x, extended_y);
                     break;
                 }
