@@ -54,7 +54,7 @@ int main() {
             (filter_choice == 1) ? SHARPEN :
             (filter_choice == 2) ? BLUR :
             EDGE_DETECTION,
-            padding_choice
+            static_cast<PaddingType>(padding_choice)
     );
     Image<int, 3> filtered_img = kernel.apply_kernel(img);
 
@@ -64,4 +64,5 @@ int main() {
     std::cout << "Immagine filtrata salvata come: " << output_name << std::endl;
 
     return 0;
+
 }

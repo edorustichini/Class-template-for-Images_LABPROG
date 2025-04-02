@@ -20,12 +20,21 @@ private:
     int width, height;
     std::vector<Pixel<T,C>> pixels;
 
-public:
-
-    explicit Image(int w=0, int h=0) : width(w), height(h) {
-        pixels.resize(w*h);
+    void is_valid_index(int x, int y) const {
+        if (x < 0 || x >= width || y < 0 || y >= height) {
+            throw std::out_of_range("Index out of bounds");
+        }
     }
 
+public:
+
+    explicit Image(int w = 1, int h = 1) : width(w), height(h) {
+        if (w <= 0 || h <= 0) {
+            throw std::invalid_argument("Width and height must be positive");
+        }
+        pixels.resize(w*h);
+    }
+    ~Image()= default;
     Image(const Image& other): width(other.width), height(other.height), pixels(other.pixels) {}
 
     Image& operator=(const Image& img){
@@ -37,18 +46,11 @@ public:
         return *this;
     }
 
-    ~Image()= default;
 
     int get_width() const { return width; }
     int get_height() const { return height; }
-    void setWidth(int w) { width = w; }
-    void setHeight(int h) { height = h; }
-
-    void is_valid_index(int x, int y) const {
-        if (x < 0 || x >= width || y < 0 || y >= height) {
-            throw std::out_of_range("Index out of bounds");
-        }
-    }
+    void set_width(int w) { width = w; }
+    void set_height(int h) { height = h; }
 
     const Pixel<T,C>& get_pixel(int x, int y) const {
         is_valid_index(x, y);
@@ -63,7 +65,6 @@ public:
         }
     }
 
-    //se ho valori per ogni canale
     void set_pixel(int x, int y, const T values[C]){
         is_valid_index(x, y);
         int index = y * width + x;

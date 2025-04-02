@@ -8,13 +8,11 @@
 #include "Image.h"
 #include <algorithm>
 
-class PPM_IO {
-public:
-
+namespace PPM_IO {
     template<typename T, int C>
-    static void write_to_PPM(const std::string& filename, Image<T,C>& img_obj) {
+    void write_to_PPM(const std::string &filename, Image<T, C> &img_obj) {
         std::ofstream img_file(filename, std::ios::out);
-        if(!img_file.is_open()){
+        if (!img_file.is_open()) {
             throw std::runtime_error("Impossible to write file");
         }
         std::string magic_number = img_obj.get_magic_number();
@@ -28,7 +26,7 @@ public:
         //write pixels
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
-                const auto& px = img_obj.get_pixel(x, y);
+                const auto &px = img_obj.get_pixel(x, y);
                 for (int i = 0; i < C; i++) {
                     int clamped_value = std::clamp(px.channels[i], 0, 255); //0 if value < 0, 255 if value > 255
                     img_file << clamped_value << " ";
@@ -40,10 +38,10 @@ public:
     }
 
     template<typename T, int C>
-    static Image<T,C> read_PPM(const std::string& filename) {
+    Image<T, C> read_PPM(const std::string &filename) {
         std::ifstream img_file(filename, std::ios::in);
         if (!img_file.is_open()) {
-            throw std::runtime_error("Impossible to read file");
+            throw std::runtime_error("Impossible to open file");
         }
 
         std::string magic_number;
@@ -51,8 +49,8 @@ public:
 
         img_file >> magic_number;
 
-        //FIXME: qua in teoria il C non lo conosco, ma se non lo conosco come faccio a sapere se è 1 o 3?
-        //quindi forse da cambiare tutto
+
+        //quindi forse da cambiare
         if ((C == 3 && magic_number != "P3") || (C == 1 && magic_number != "P2")) {
             throw std::runtime_error("Incorrect format");
         }
@@ -77,9 +75,5 @@ public:
         img_file.close();
         return img_obj;
     }
-
-    //TODO: nei file PPM possono esserci dei commenti, come gestirli?
-};
-
-
+}
 #endif //IMAGES_TEMPLATE__LABPROGR__PPM_IO_H
