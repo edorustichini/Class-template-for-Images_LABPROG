@@ -5,8 +5,6 @@
 #include "../src/PPM_IO.h"
 #include "../src/Kernel.h"
 
-//TODO: considerare di usare fixture per test di read e write
-
 TEST(PPM_IOTest, write){
     Image<int, 3> img(2, 2);
     Pixel<int, 3> px[] = {{255, 255, 255}, {255, 0, 0}, {0, 0, 255},{0, 128, 0}};
@@ -21,17 +19,12 @@ TEST(PPM_IOTest, write){
     ASSERT_NO_THROW(PPM_IO::write_to_PPM("../../images/tests/simmple-rgb.ppm", img));
 }
 
-TEST(PPM_IOTest, read){
-    //TODO: cosa testare?
-}
-
-
 TEST(PPM_IOTest, readwrite) {
     std::vector<std::string> list = {"apollo.ppm", "landscape.ppm", "bird2.ppm", "monument.ppm"};
 
-    for(int i=0;i < list.size(); i++){
-        Image<int, 3> img = PPM_IO::read_PPM<int, 3>("../../images/"+list[i]);
-        std::string output_path = "../../images/tests/"+list[i]+"_Test.ppm";
+    for(const auto & i : list){
+        Image<int, 3> img = PPM_IO::read_PPM<int, 3>("../../images/"+i);
+        std::string output_path = "../../images/tests/"+i+"_Test.ppm";
         PPM_IO::write_to_PPM(output_path, img);
         Image<int, 3> img2 = PPM_IO::read_PPM<int, 3>(output_path);
 

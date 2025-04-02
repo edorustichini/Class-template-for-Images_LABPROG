@@ -27,8 +27,8 @@ TEST(ImageTest, PixelSetAndGet) {
 
 TEST(ImageTest, ValidIndexTest){
     Image<int, 3> img(2, 2);
-    EXPECT_NO_THROW(img.is_valid_index(0, 0));
-    EXPECT_NO_THROW(img.is_valid_index(1, 1));
-    EXPECT_THROW(img.is_valid_index(0, 2), std::out_of_range);
-    EXPECT_THROW(img.is_valid_index(2, 2), std::out_of_range);
+    EXPECT_NO_THROW(img.get_pixel(0, 0));
+    EXPECT_NO_THROW(img.get_pixel(1, 1));
+    EXPECT_THROW(img.get_pixel(0, 2), std::out_of_range);
+    EXPECT_THROW(img.get_pixel(2, 2), std::out_of_range);
 }
