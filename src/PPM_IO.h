@@ -50,7 +50,6 @@ namespace PPM_IO {
         img_file >> magic_number;
 
 
-        //quindi forse da cambiare
         if ((C == 3 && magic_number != "P3") || (C == 1 && magic_number != "P2")) {
             throw std::runtime_error("Incorrect format");
         }
