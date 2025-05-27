@@ -3,7 +3,7 @@
 #include "Kernel.h"
 #include "PPM_IO.h"
 
-// Definiamo alcuni kernel predefiniti
+// pre-defined kernels
 const std::array<std::array<int, 3>, 3> SHARPEN = {{
                                                            {  0, -1,  0 },
                                                            { -1,  5, -1 },
